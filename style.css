@@ -1,73 +1,183 @@
+/* General Styles */
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #f2f2f2, #e0eafc);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
 }
 
-.container {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
-  padding: 2rem;
-  text-align: center;
-  max-width: 900px;
-  width: 100%;
+header {
+    background-color: #3498db; /* Modern Blue */
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #333;
+nav ul {
+    padding: 0;
+    list-style: none;
 }
 
-input[type="file"] {
-  margin: 1rem 0;
+nav ul li {
+    display: inline;
+    margin: 0 1rem;
 }
 
-.editor {
-  position: relative;
-  border: 2px dashed #ccc;
-  border-radius: 16px;
-  margin: 1rem auto;
-  max-width: 100%;
-  background: #fff;
+nav a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
-canvas {
-  display: block;
-  border-radius: 16px;
-  max-width: 100%;
+nav a:hover {
+    color: #f0f0f0;
 }
 
-.accessory-panel {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+main {
+    padding: 2rem;
+    max-width: 1200px; /* Limit width for larger screens */
+    margin: 0 auto; /* Center the content */
 }
 
-.accessory {
-  width: 64px;
-  height: 64px;
-  cursor: move;
-  transition: transform 0.2s;
+.content-section {
+    margin-bottom: 2rem;
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  margin-top: 1rem;
+h2 {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+    color: #3498db;
 }
 
-button:hover {
-  background-color: #0056b3;
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+/* Image Editor Styles */
+#imageCanvas {
+    border: 1px solid #ddd;
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.upload-container {
+    margin-bottom: 1rem;
+}
+
+.upload-button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    border: none;
+}
+
+.upload-button:hover {
+    background-color: #2980b9;
+}
+
+#imageUpload {
+    display: none;
+}
+
+.controls {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.text-controls,
+.transform-controls,
+.effect-controls,
+.download-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 0.75rem;
+    border-radius: 5px;
+}
+
+.text-controls label,
+.transform-controls label {
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.text-controls input[type="text"],
+.text-controls select,
+.text-controls input[type="color"],
+.transform-controls input[type="number"] {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.text-controls button,
+.transform-controls button,
+.effect-controls button,
+.download-controls button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.text-controls button:hover,
+.transform-controls button:hover,
+.effect-controls button:hover,
+.download-controls button:hover {
+    background-color: #2980b9;
+}
+
+/* Error Message */
+.error {
+    color: red;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav ul li {
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .text-controls,
+    .transform-controls,
+    .effect-controls,
+    .download-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
