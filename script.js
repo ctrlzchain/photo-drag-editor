@@ -18,28 +18,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const bringToFrontButton = document.getElementById('bringToFrontButton');
     const sendToBackButton = document.getElementById('sendToBackButton');
 
-    let canvas = new fabric.Canvas('imageCanvas');
-    let currentText = null;
-    let zoomLevel = 1; // Initialize zoom level
+    // Initialize canvas
+    let canvas = new fabric.Canvas('imageCanvas', {
+        backgroundColor: '#ffffff'
+    });
 
-    // Function to clear error messages
-    const clearError = () => {
-        errorMessage.textContent = '';
+    // Function to show error messages
+    const showError = (message) => {
+        errorMessage.textContent = message;
+        errorMessage.classList.add('show');
+        setTimeout(() => {
+            errorMessage.classList.remove('show');
+        }, 5000);
     };
 
     // Image Upload Handler
     imageUpload.addEventListener('change', (event) => {
-        clearError();
-
         const file = event.target.files[0];
 
         if (!file) {
-            errorMessage.textContent = 'No file selected.';
+            showError('No file selected.');
             return;
         }
 
         if (!file.type.startsWith('image/')) {
-            errorMessage.textContent = 'Please upload a valid image file.';
+            showError('Please upload a valid image file.');
             return;
         }
 
@@ -49,9 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fabric.Image.fromURL(e.target.result, (img) => {
                 canvas.clear();
 
-                const scaleX = canvas.width / img.width;
-                const scaleY = canvas.height / img.height;
-                const scale = Math.min(scaleX, scaleY);
+                // Scale image to fit canvas while maintaining aspect ratio
+                const scale = Math.min(
+                    canvas.width / img.width,
+                    canvas.height / img.height
+                );
 
                 img.set({
                     scaleX: scale,
@@ -72,11 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add Text Handler
     addTextButton.addEventListener('click', () => {
-        clearError();
         const text = textInput.value.trim();
 
         if (!text) {
-            errorMessage.textContent = 'Please enter text.';
+            showError('Please enter text.');
             return;
         }
 
@@ -96,38 +100,121 @@ document.addEventListener('DOMContentLoaded', () => {
 
         canvas.add(fabricText);
         canvas.setActiveObject(fabricText);
-        currentText = fabricText;
+        canvas.renderAll();
     });
 
     // Add Asset Handler
     addAssetButton.addEventListener('click', () => {
-        clearError();
         const asset = assetSelect.value;
 
         if (!asset && !userAssetUpload.files[0]) {
-            return; // No asset selected and no user asset uploaded
+            showError('Please select an asset or upload your own.');
+            return;
         }
 
-        const loadAsset = (assetSource) => {
-            fabric.Image.fromURL(assetSource, (img) => {
-                img.set({
-                    left: 100,
-                    top: 100,
-                    originX: 'center',
-                    originY: 'center',
-                    hasRotatingPoint: true,
-                    scaleX: 0.5,
-                    scaleY: 0.5
-                });
-
-                canvas.add(img);
-                canvas.setActiveObject(img);
-                canvas.renderAll();
-            }, { crossOrigin: 'anonymous' });
-        };
-
         if (asset) {
-            // Load from predefined assets
-            loadAsset(`assets/${asset}.png`);
+            // Placeholder for predefined assets
+            showError('Predefined assets are not implemented yet. Please upload your own image.');
         } else if (userAssetUpload.files[0]) {
-            // Load from
+            const file = userAssetUpload.files[0];
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                fabric.Image.fromURL(e.target.result, (img) => {
+                    img.set({
+                        left: 100,
+                        top: 100,
+                        originX: 'center',
+                        originY: 'center',
+                        hasRotatingPoint: true,
+                        scaleX: 0.5,
+                        scaleY: 0.5
+                    });
+
+                    canvas.add(img);
+                    canvas.setActiveObject(img);
+                    canvas.renderAll();
+                }, { crossOrigin: 'anonymous' });
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // User Asset Upload Handler
+    userAssetUpload.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        
+        if (!file) {
+            showError('No file selected.');
+            return;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            showError('Please upload a valid image file.');
+            return;
+        }
+    });
+
+    // Rotation Handler
+    rotateButton.addEventListener('click', () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+            activeObject.set('angle', parseInt(rotationInput.value));
+            canvas.renderAll();
+        } else {
+            showError('No object selected to rotate.');
+        }
+    });
+
+    // Layer Controls
+    bringToFrontButton.addEventListener('click', () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+            activeObject.bringToFront();
+            canvas.renderAll();
+        } else {
+            showError('No object selected to bring to front.');
+        }
+    });
+
+    sendToBackButton.addEventListener('click', () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+            activeObject.sendToBack();
+            canvas.renderAll();
+        } else {
+            showError('No object selected to send to back.');
+        }
+    });
+
+    // Zoom Controls
+    zoomButton.addEventListener('click', () => {
+        const zoomValue = parseInt(zoomInput.value) / 100;
+        canvas.setZoom(zoomValue);
+        canvas.renderAll();
+    });
+
+    // Download Handler
+    downloadButton.addEventListener('click', () => {
+        if (canvas.isEmpty()) {
+            showError('Canvas is empty. Please add an image first.');
+            return;
+        }
+        
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 1
+        });
+        
+        const link = document.createElement('a');
+        link.download = 'xyz-coin-meme.png';
+        link.href = dataURL;
+        link.click();
+    });
+
+    // Placeholder for Aura Effect
+    applyAuraButton.addEventListener('click', () => {
+        showError('Aura effect is a placeholder feature. Not implemented yet.');
+    });
+});

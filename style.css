@@ -189,3 +189,16 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  display: none;
+}
+
+.error.show {
+  display: block;
+}
