@@ -3,10 +3,10 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #e6d8b9; /* Light Coffee Background */
+    background-color: #f5f0e1; /* Light Coffee Background */
     color: #4a3728; /* Dark Coffee Text */
     line-height: 1.6;
-    transition: background-color 0.5s ease; /* Smoother transition */
+    transition: background-color 0.5s ease; /* Smooth transition */
 }
 
 header {
