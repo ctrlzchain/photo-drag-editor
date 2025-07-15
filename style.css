@@ -3,10 +3,10 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f0e1; /* Light Coffee Background */
+    background-color: #e6d8b9; /* Light Coffee Background */
     color: #4a3728; /* Dark Coffee Text */
     line-height: 1.6;
-    transition: background-color 0.5s ease; /* Smooth transition */
+    transition: background-color 0.5s ease; /* Smoother transition */
 }
 
 header {
@@ -81,10 +81,6 @@ footer {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: box-shadow 0.3s ease;
-    position: absolute; /* Ensure it's positioned correctly */
-    top: 0;
-    left: 0;
-    z-index: 1; /* Fabric.js canvas is below PixiJS */
 }
 
 #imageCanvas:hover {
@@ -125,7 +121,13 @@ footer {
     gap: 1rem;
 }
 
-.effect-controls {
+.text-controls,
+.asset-controls,
+.transform-controls,
+.zoom-controls, /* New */
+.layer-controls,
+.effect-controls,
+.download-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -136,6 +138,30 @@ footer {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.text-controls label,
+.asset-controls label,
+.transform-controls label,
+.zoom-controls label {
+    margin-right: 0.5rem;
+    font-weight: bold;
+    color: #543d29; /* Dark Brown Labels */
+}
+
+.text-controls input[type="text"],
+.text-controls select,
+.text-controls input[type="color"],
+.transform-controls input[type="number"],
+.zoom-controls input[type="number"] {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.text-controls button,
+.asset-controls button,
+.transform-controls button,
+.zoom-controls button,
+.layer-controls button,
 .effect-controls button,
 .download-controls button {
     background-color: #a0522d; /* Sienna Button */
@@ -148,6 +174,11 @@ footer {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.text-controls button:hover,
+.asset-controls button:hover,
+.transform-controls button:hover,
+.zoom-controls button:hover,
+.layer-controls button:hover,
 .effect-controls button:hover,
 .download-controls button:hover {
     background-color: #804020;
@@ -161,22 +192,6 @@ footer {
     margin-top: 10px;
     font-weight: bold;
     animation: fadeIn 0.5s ease-in-out;
-}
-
-#canvas-container {
-    position: relative;  /* Required for absolute positioning */
-    width: 600px;        /* Match canvas width */
-    height: 400px;       /* Match canvas height */
-}
-
-#pixi-canvas-overlay {
-    position: absolute; /* Place PixiJS canvas at the top */
-    top: 0;
-    left: 0;
-    width: 600px;    /* Match canvas width */
-    height: 400px;   /* Match canvas height */
-    z-index: 2;       /* Ensure PixiJS canvas is above Fabric.js */
-    pointer-events: none; /* Allow interaction with Fabric.js canvas */
 }
 
 /* Keyframes */
@@ -210,6 +225,11 @@ footer {
         flex-direction: column;
     }
 
+    .text-controls,
+    .asset-controls,
+    .transform-controls,
+    .zoom-controls,
+    .layer-controls,
     .effect-controls,
     .download-controls {
         flex-direction: column;
