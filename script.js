@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addFartCloud = document.getElementById('addFartCloud');
     const pixiCanvasOverlay = document.getElementById('pixi-canvas-overlay');
 
-    let canvas = new fabric.Canvas('imageCanvas');
+    let canvas;
     let pixiApp;
     let uploadedImage;
 
@@ -16,8 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.textContent = '';
     };
 
+    // Check if Fabric.js is loaded
+    if (typeof fabric === 'undefined') {
+        errorMessage.textContent = 'Fabric.js failed to load. Please check your internet connection.';
+        return;
+    } else {
+        canvas = new fabric.Canvas('imageCanvas');
+    }
+
     // Initialize PixiJS Application
     const initPixi = () => {
+        if (typeof PIXI === 'undefined') {
+            errorMessage.textContent = 'PixiJS failed to load. Please check your internet connection.';
+            return;
+        }
+
         pixiApp = new PIXI.Application({
             view: pixiCanvasOverlay,
             width: 600,
@@ -31,8 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     initPixi(); // Initialize PixiJS
 
     //Load Image Assets
-    let laserEyesTexture = PIXI.Texture.from('assets/laserEyes.png');
-    let fartCloudTexture = PIXI.Texture.from('assets/fartCloud.png');
+    let laserEyesTexture;
+    let fartCloudTexture;
+
+    try {
+        laserEyesTexture = PIXI.Texture.from('assets/laserEyes.png');
+        fartCloudTexture = PIXI.Texture.from('assets/fartCloud.png');
+    } catch (e) {
+        errorMessage.textContent = 'Failed to load assets. Ensure the assets folder exists and contains the necessary images.';
+        console.error("Asset Loading Error:", e);
+    }
 
     // Image Upload Handler
     imageUpload.addEventListener('change', (event) => {
@@ -53,27 +74,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            fabric.Image.fromURL(e.target.result, (img) => {
-                canvas.clear();
+            try {
+                fabric.Image.fromURL(e.target.result, (img) => {
+                    canvas.clear();
 
-                const scaleX = canvas.width / img.width;
-                const scaleY = canvas.height / img.height;
-                const scale = Math.min(scaleX, scaleY);
+                    const scaleX = canvas.width / img.width;
+                    const scaleY = canvas.height / img.height;
+                    const scale = Math.min(scaleX, scaleY);
 
-                img.set({
-                    scaleX: scale,
-                    scaleY: scale,
-                    originX: 'center',
-                    originY: 'center',
-                    left: canvas.width / 2,
-                    top: canvas.height / 2
-                });
+                    img.set({
+                        scaleX: scale,
+                        scaleY: scale,
+                        originX: 'center',
+                        originY: 'center',
+                        left: canvas.width / 2,
+                        top: canvas.height / 2
+                    });
 
-                canvas.add(img);
-                uploadedImage = img; //Store uploaded Image
-                canvas.renderAll();
-                clearPixiStage();
-            }, { crossOrigin: 'anonymous' });
+                    canvas.add(img);
+                    uploadedImage = img; //Store uploaded Image
+                    canvas.renderAll();
+                    clearPixiStage();
+                }, { crossOrigin: 'anonymous' });
+            } catch (e) {
+                errorMessage.textContent = "Error loading image to canvas.";
+                console.error("Fabric.js Image Loading Error:", e);
+            }
+
         };
 
         reader.readAsDataURL(file);
@@ -83,45 +110,56 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadButton.addEventListener('click', () => {
         clearError();
 
-        //Ensure that Fabric.js and PixiJS are layered correctly
-        canvas.lowerCanvas(); //Brings fabric JS to bottom Layer so PIXI is properly on top
-        //Render PIXI to base64
-        const pixiBase64 = pixiApp.renderer.plugins.extract.base64();
+        if (!uploadedImage) {
+            errorMessage.textContent = 'Please upload an image before downloading.';
+            return;
+        }
 
-        //Render Fabric to base64
-        const fabricBase64 = imageCanvas.toDataURL({format:'png'});
+        try {
+            //Ensure that Fabric.js and PixiJS are layered correctly
+            canvas.lowerCanvas(); //Brings fabric JS to bottom Layer so PIXI is properly on top
+            //Render PIXI to base64
+            const pixiBase64 = pixiApp.renderer.plugins.extract.base64();
 
-        //Combine the 2
-        let combinedImage = new Image();
-        combinedImage.onload = function() {
-            //Create Canvas the size of fabric
-            let newCanvas = document.createElement('canvas');
-            newCanvas.width = imageCanvas.width;
-            newCanvas.height = imageCanvas.height;
+            //Render Fabric to base64
+            const fabricBase64 = imageCanvas.toDataURL({format:'png'});
 
-            let ctx = newCanvas.getContext('2d');
-            //Draw Background Fabric image
-            ctx.drawImage(this, 0, 0);
+            //Combine the 2
+            let combinedImage = new Image();
+            combinedImage.onload = function() {
+                //Create Canvas the size of fabric
+                let newCanvas = document.createElement('canvas');
+                newCanvas.width = imageCanvas.width;
+                newCanvas.height = imageCanvas.height;
 
-            //Draw over with Pixi Canvas
-            let pixiImage = new Image();
-            pixiImage.onload = function() {
+                let ctx = newCanvas.getContext('2d');
+                //Draw Background Fabric image
                 ctx.drawImage(this, 0, 0);
 
-                //Convert Image and Download
-                let link = document.createElement('a');
-                link.href = newCanvas.toDataURL("image/png");
-                link.download = "meme.png";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                //Draw over with Pixi Canvas
+                let pixiImage = new Image();
+                pixiImage.onload = function() {
+                    ctx.drawImage(this, 0, 0);
 
-                canvas.upperCanvas(); //Moves Fabric canvas back to Top
-            }
-            pixiImage.src = pixiBase64;
+                    //Convert Image and Download
+                    let link = document.createElement('a');
+                    link.href = newCanvas.toDataURL("image/png");
+                    link.download = "meme.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
 
-        };
-        combinedImage.src = fabricBase64; //Load Fabric
+                    canvas.upperCanvas(); //Moves Fabric canvas back to Top
+                }
+                pixiImage.src = pixiBase64;
+
+            };
+            combinedImage.src = fabricBase64; //Load Fabric
+        } catch (e) {
+            errorMessage.textContent = "Error during download process.";
+            console.error("Download Error:", e);
+            canvas.upperCanvas();  //Ensure Canvas is back to top if error
+        }
 
 
     });
@@ -130,11 +168,21 @@ document.addEventListener('DOMContentLoaded', () => {
         pixiApp.stage.removeChildren();
     }
 
-    //Laser Eyes Button function
-    addLaserEyes.addEventListener('click', () => {
+    //Helper function to add pixi effect
+    function addPixiEffect(effect) {
         clearError();
         if(uploadedImage) {
             clearPixiStage();
+
+            effect(); //Run PIXI effect if image is uploaded
+        } else {
+            errorMessage.textContent = "Upload an Image First"
+        }
+    }
+
+    //Laser Eyes Button function
+    addLaserEyes.addEventListener('click', () => {
+        addPixiEffect( () => {
             let laserEyesSprite1 = PIXI.Sprite.from(laserEyesTexture);
             let laserEyesSprite2 = PIXI.Sprite.from(laserEyesTexture);
 
@@ -153,17 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
             //Add to stage
             pixiApp.stage.addChild(laserEyesSprite1);
             pixiApp.stage.addChild(laserEyesSprite2);
-
-        } else {
-            errorMessage.textContent = "Upload an Image First"
-        }
+        });
     });
 
     //Add Fart Cloud
     addFartCloud.addEventListener('click', () => {
-        clearError();
-        if(uploadedImage) {
-            clearPixiStage();
+        addPixiEffect(() => {
             let fartCloudSprite = PIXI.Sprite.from(fartCloudTexture);
 
             //Set Anchor
@@ -179,10 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             //Add to stage
             pixiApp.stage.addChild(fartCloudSprite);
-
-        } else {
-            errorMessage.textContent = "Upload an Image First"
-        }
+        });
     });
 
 });
