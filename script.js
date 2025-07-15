@@ -67,6 +67,56 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.renderAll();
     });
 
+    // Add asset (including laserEyes.png)
+    document.getElementById('addAssetButton').addEventListener('click', function() {
+        const assetType = document.getElementById('assetSelect').value;
+        
+        if (assetType === 'laserEyes') {
+            // Load laserEyes.png from assets folder
+            fabric.Image.fromURL('assets/laserEyes.png', function(img) {
+                img.set({
+                    left: 100,
+                    top: 100,
+                    originX: 'center',
+                    originY: 'center',
+                    scaleX: 0.5,
+                    scaleY: 0.5
+                });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        } else if (assetType) {
+            showError('Selected asset not found');
+        } else {
+            showError('Please select an asset first');
+        }
+    });
+
+    // Handle user asset upload
+    document.getElementById('userAssetUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            fabric.Image.fromURL(event.target.result, function(img) {
+                img.set({
+                    left: 100,
+                    top: 100,
+                    originX: 'center',
+                    originY: 'center',
+                    scaleX: 0.5,
+                    scaleY: 0.5
+                });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
     // Download image
     document.getElementById('downloadButton').addEventListener('click', function() {
         if (canvas.isEmpty()) {
