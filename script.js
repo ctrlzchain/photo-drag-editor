@@ -21,7 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.textContent = 'Fabric.js failed to load. Please check your internet connection.';
         return;
     } else {
-        canvas = new fabric.Canvas('imageCanvas');
+        try {
+            canvas = new fabric.Canvas('imageCanvas');
+        } catch (e) {
+            errorMessage.textContent = 'Failed to initialize Fabric.js canvas.';
+            console.error("Fabric.js Initialization Error:", e);
+            return;
+        }
     }
 
     // Initialize PixiJS Application
@@ -31,14 +37,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        pixiApp = new PIXI.Application({
-            view: pixiCanvasOverlay,
-            width: 600,
-            height: 400,
-            transparent: true,
-            autoDensity: true
-        });
-        pixiApp.stage.sortableChildren = true; //Important to ensure layering
+        try {
+            pixiApp = new PIXI.Application({
+                view: pixiCanvasOverlay,
+                width: 600,
+                height: 400,
+                transparent: true,
+                autoDensity: true
+            });
+            pixiApp.stage.sortableChildren = true; //Important to ensure layering
+        } catch (e) {
+            errorMessage.textContent = 'Failed to initialize PixiJS application.';
+            console.error("PixiJS Initialization Error:", e);
+            return;
+        }
     };
 
     initPixi(); // Initialize PixiJS
