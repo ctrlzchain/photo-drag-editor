@@ -13,14 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyAuraButton = document.getElementById('applyAuraButton');
     const downloadButton = document.getElementById('downloadButton');
     const errorMessage = document.getElementById('error-message');
-    const zoomInput = document.getElementById('zoomInput');
-    const zoomButton = document.getElementById('zoomButton');
-    const bringToFrontButton = document.getElementById('bringToFrontButton');
-    const sendToBackButton = document.getElementById('sendToBackButton');
 
     let canvas = new fabric.Canvas('imageCanvas');
     let currentText = null;
-    let zoomLevel = 1; // Initialize zoom level
 
     // Function to clear error messages
     const clearError = () => {
@@ -130,4 +125,106 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load from predefined assets
             loadAsset(`assets/\${asset}.png`);
         } else if (userAssetUpload.files[0]) {
-            // Load from
+            // Load from user-uploaded asset
+            const file = userAssetUpload.files[0];
+
+            if (!file.type.startsWith('image/')) {
+                errorMessage.textContent = 'Please upload a valid image file.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadAsset(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Rotate Handler
+    rotateButton.addEventListener('click', () => {
+        clearError();
+        const angle = parseFloat(rotationInput.value);
+
+        if (isNaN(angle)) {
+            errorMessage.textContent = 'Please enter a valid rotation angle.';
+            return;
+        }
+
+        const activeObject = canvas.getActiveObject();
+
+        if (!activeObject) {
+            errorMessage.textContent = 'Please select an object to rotate.';
+            return;
+        }
+
+        activeObject.rotate(angle);
+        canvas.renderAll();
+    });
+
+    // Aura Handler (Placeholder)
+    applyAuraButton.addEventListener('click', () => {
+        clearError();
+        alert('Dragon Ball Aura effect not implemented yet. This requires advanced image processing techniques.');
+    });
+
+    // Download Handler
+    downloadButton.addEventListener('click', () => {
+        clearError();
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 0.8
+        });
+
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'meme.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // Canvas Object Selection Handler
+    canvas.on('object:selected', (options) => {
+        if (options.target && options.target.type === 'text') {
+            textInput.value = options.target.text;
+            fontSelect.value = options.target.fontFamily;
+            textColor.value = options.target.fill;
+            currentText = options.target;
+        } else {
+            textInput.value = "";
+            currentText = null;
+        }
+    });
+
+    canvas.on('object:moving', (options) => {
+        clearError();
+    });
+    canvas.on('object:scaling', (options) => {
+        clearError();
+    });
+    canvas.on('object:rotating', (options) => {
+        clearError();
+    });
+
+    textInput.addEventListener('input', function () {
+        if (currentText) {
+            currentText.set('text', this.value);
+            canvas.renderAll();
+        }
+    });
+
+    fontSelect.addEventListener('change', function () {
+        if (currentText) {
+            currentText.set('fontFamily', this.value);
+            canvas.renderAll();
+        }
+    });
+
+    textColor.addEventListener('input', function () {
+        if (currentText) {
+            currentText.set('fill', this.value);
+            canvas.renderAll();
+        }
+    });
+});
