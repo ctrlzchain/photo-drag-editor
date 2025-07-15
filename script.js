@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTextButton = document.getElementById('addTextButton');
     const assetSelect = document.getElementById('assetSelect');
     const addAssetButton = document.getElementById('addAssetButton');
+    const userAssetUpload = document.getElementById('userAssetUpload');
     const rotationInput = document.getElementById('rotationInput');
     const rotateButton = document.getElementById('rotateButton');
     const applyAuraButton = document.getElementById('applyAuraButton');
@@ -98,27 +99,46 @@ document.addEventListener('DOMContentLoaded', () => {
         clearError();
         const asset = assetSelect.value;
 
-        if (!asset) {
-            return; // No asset selected
+        if (!asset && !userAssetUpload.files[0]) {
+            return; // No asset selected and no user asset uploaded
         }
 
-        const assetURL = `assets/\${asset}.png`; // Construct the asset URL
+        const loadAsset = (assetSource) => {
+            fabric.Image.fromURL(assetSource, (img) => {
+                img.set({
+                    left: 100,
+                    top: 100,
+                    originX: 'center',
+                    originY: 'center',
+                    hasRotatingPoint: true,
+                    scaleX: 0.5,
+                    scaleY: 0.5
+                });
 
-        fabric.Image.fromURL(assetURL, (img) => {
-            img.set({
-                left: 100,
-                top: 100,
-                originX: 'center',
-                originY: 'center',
-                hasRotatingPoint: true,
-                scaleX: 0.5, // Adjust initial scale
-                scaleY: 0.5
-            });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        };
 
-            canvas.add(img);
-            canvas.setActiveObject(img);
-            canvas.renderAll();
-        }, { crossOrigin: 'anonymous' });
+        if (asset) {
+            // Load from predefined assets
+            loadAsset(`assets/\${asset}.png`);
+        } else if (userAssetUpload.files[0]) {
+            // Load from user-uploaded asset
+            const file = userAssetUpload.files[0];
+
+            if (!file.type.startsWith('image/')) {
+                errorMessage.textContent = 'Please upload a valid image file.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadAsset(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
     // Rotate Handler
