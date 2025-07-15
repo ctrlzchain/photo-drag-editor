@@ -128,6 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (asset) {
             // Load from predefined assets
-            loadAsset(`assets/\${asset}.png`);
+            loadAsset(`assets/${asset}.png`);
         } else if (userAssetUpload.files[0]) {
             // Load from
