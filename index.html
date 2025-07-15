@@ -5,25 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Photo Drag Editor</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
-  <h1>📸 Photo Drag Editor</h1>
-  <input type="file" id="upload" accept="image/*" />
-  <div id="editor-container">
-    <div id="canvas-wrapper">
-      <img id="main-image" />
-      <div id="overlay"></div>
+  <div class="container">
+    <h1>Photo Drag Editor</h1>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <div class="editor">
+      <canvas id="canvas" width="1080" height="1080"></canvas>
+      <div class="accessory-panel">
+        <img src="accessories/sunglasses.png" class="accessory" />
+        <img src="accessories/rocket.png" class="accessory" />
+      </div>
     </div>
-    <div id="accessory-bar">
-      <h2>Add Accessories</h2>
-      <img src="assets/hat.png" class="accessory" />
-      <img src="assets/sunglasses.png" class="accessory" />
-    </div>
+    <button id="downloadBtn">Download Image</button>
   </div>
-  <button id="download">Download Final Image</button>
-
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <script src="script.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>

@@ -1,82 +1,58 @@
-const uploadInput = document.getElementById('upload');
-const mainImage = document.getElementById('main-image');
-const overlay = document.getElementById('overlay');
-const accessories = document.querySelectorAll('.accessory');
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const imageUpload = document.getElementById("imageUpload");
+const downloadBtn = document.getElementById("downloadBtn");
 
-uploadInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+let baseImage = new Image();
+
+imageUpload.addEventListener("change", (e) => {
   const reader = new FileReader();
-  reader.onload = function(event) {
-    mainImage.src = event.target.result;
-    overlay.innerHTML = '';
+  reader.onload = function (event) {
+    baseImage.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(baseImage, 0, 0, 1080, 1080);
+    };
+    baseImage.src = event.target.result;
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(e.target.files[0]);
 });
 
-// Clone accessory and add to overlay
-accessories.forEach(item => {
-  item.addEventListener('click', () => {
-    const clone = item.cloneNode(true);
-    clone.classList.add('draggable', 'resizable');
-    clone.style.left = '50px';
-    clone.style.top = '50px';
-    overlay.appendChild(clone);
-    makeInteractive(clone);
-  });
+downloadBtn.addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "edited-image.png";
+  link.href = canvas.toDataURL();
+  link.click();
 });
 
-// Enable dragging + resizing + rotating
-function makeInteractive(el) {
-  interact(el)
-    .draggable({
-      listeners: {
-        move(event) {
-          const target = event.target;
-          const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-          const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+// Accessory drag-and-drop using interact.js
+document.querySelectorAll(".accessory").forEach((el) => {
+  el.style.position = "absolute";
+  el.style.left = "100px";
+  el.style.top = "100px";
+  document.body.appendChild(el);
 
-          target.style.transform = `translate(${x}px, ${y}px) rotate(${target.getAttribute('data-rot') || 0}deg)`;
-          target.setAttribute('data-x', x);
-          target.setAttribute('data-y', y);
-        }
-      }
-    })
-    .resizable({
-      edges: { left: true, right: true, bottom: true, top: true },
-      preserveAspectRatio: true,
-    })
-    .on('resizemove', function (event) {
+  interact(el).draggable({
+    onmove(event) {
       const target = event.target;
-      let width = event.rect.width;
-      let height = event.rect.height;
+      const x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
+      const y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
 
-      target.style.width = width + 'px';
-      target.style.height = height + 'px';
-    })
-    .gesturable({
-      listeners: {
-        move(event) {
-          const target = event.target;
-          let current = parseFloat(target.getAttribute('data-rot')) || 0;
-          const rotation = current + event.da;
-          target.setAttribute('data-rot', rotation);
-          const x = parseFloat(target.getAttribute('data-x')) || 0;
-          const y = parseFloat(target.getAttribute('data-y')) || 0;
-          target.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
-        }
-      }
-    });
-}
+      target.style.transform = `translate(${x}px, ${y}px) rotate(${target.getAttribute("data-rotate") || 0}deg) scale(${target.getAttribute("data-scale") || 1})`;
+      target.setAttribute("data-x", x);
+      target.setAttribute("data-y", y);
+    }
+  }).gesturable({
+    onmove(event) {
+      const target = event.target;
+      const scale = (parseFloat(target.getAttribute("data-scale")) || 1) * (1 + event.ds);
+      const angle = (parseFloat(target.getAttribute("data-rotate")) || 0) + event.da;
 
-// Download final result as image
-document.getElementById('download').addEventListener('click', () => {
-  const wrapper = document.getElementById('canvas-wrapper');
+      target.setAttribute("data-scale", scale);
+      target.setAttribute("data-rotate", angle);
 
-  html2canvas(wrapper).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'photo-edited.png';
-    link.href = canvas.toDataURL();
-    link.click();
+      const x = parseFloat(target.getAttribute("data-x")) || 0;
+      const y = parseFloat(target.getAttribute("data-y")) || 0;
+      target.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg) scale(${scale})`;
+    }
   });
 });
