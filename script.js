@@ -7,14 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTextButton = document.getElementById('addTextButton');
     const assetSelect = document.getElementById('assetSelect');
     const addAssetButton = document.getElementById('addAssetButton');
+    const userAssetUpload = document.getElementById('userAssetUpload');
     const rotationInput = document.getElementById('rotationInput');
     const rotateButton = document.getElementById('rotateButton');
     const applyAuraButton = document.getElementById('applyAuraButton');
     const downloadButton = document.getElementById('downloadButton');
     const errorMessage = document.getElementById('error-message');
+    const zoomInput = document.getElementById('zoomInput');
+    const zoomButton = document.getElementById('zoomButton');
+    const bringToFrontButton = document.getElementById('bringToFrontButton');
+    const sendToBackButton = document.getElementById('sendToBackButton');
 
     let canvas = new fabric.Canvas('imageCanvas');
     let currentText = null;
+    let zoomLevel = 1; // Initialize zoom level
 
     // Function to clear error messages
     const clearError = () => {
@@ -98,113 +104,30 @@ document.addEventListener('DOMContentLoaded', () => {
         clearError();
         const asset = assetSelect.value;
 
-        if (!asset) {
-            return; // No asset selected
+        if (!asset && !userAssetUpload.files[0]) {
+            return; // No asset selected and no user asset uploaded
         }
 
-        const assetURL = `assets/\${asset}.png`; // Construct the asset URL
+        const loadAsset = (assetSource) => {
+            fabric.Image.fromURL(assetSource, (img) => {
+                img.set({
+                    left: 100,
+                    top: 100,
+                    originX: 'center',
+                    originY: 'center',
+                    hasRotatingPoint: true,
+                    scaleX: 0.5,
+                    scaleY: 0.5
+                });
 
-        fabric.Image.fromURL(assetURL, (img) => {
-            img.set({
-                left: 100,
-                top: 100,
-                originX: 'center',
-                originY: 'center',
-                hasRotatingPoint: true,
-                scaleX: 0.5, // Adjust initial scale
-                scaleY: 0.5
-            });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        };
 
-            canvas.add(img);
-            canvas.setActiveObject(img);
-            canvas.renderAll();
-        }, { crossOrigin: 'anonymous' });
-    });
-
-    // Rotate Handler
-    rotateButton.addEventListener('click', () => {
-        clearError();
-        const angle = parseFloat(rotationInput.value);
-
-        if (isNaN(angle)) {
-            errorMessage.textContent = 'Please enter a valid rotation angle.';
-            return;
-        }
-
-        const activeObject = canvas.getActiveObject();
-
-        if (!activeObject) {
-            errorMessage.textContent = 'Please select an object to rotate.';
-            return;
-        }
-
-        activeObject.rotate(angle);
-        canvas.renderAll();
-    });
-
-    // Aura Handler (Placeholder)
-    applyAuraButton.addEventListener('click', () => {
-        clearError();
-        alert('Dragon Ball Aura effect not implemented yet. This requires advanced image processing techniques.');
-    });
-
-    // Download Handler
-    downloadButton.addEventListener('click', () => {
-        clearError();
-        const dataURL = canvas.toDataURL({
-            format: 'png',
-            quality: 0.8
-        });
-
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = 'meme.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-
-    // Canvas Object Selection Handler
-    canvas.on('object:selected', (options) => {
-        if (options.target && options.target.type === 'text') {
-            textInput.value = options.target.text;
-            fontSelect.value = options.target.fontFamily;
-            textColor.value = options.target.fill;
-            currentText = options.target;
-        } else {
-            textInput.value = "";
-            currentText = null;
-        }
-    });
-
-    canvas.on('object:moving', (options) => {
-        clearError();
-    });
-    canvas.on('object:scaling', (options) => {
-        clearError();
-    });
-    canvas.on('object:rotating', (options) => {
-        clearError();
-    });
-
-    textInput.addEventListener('input', function () {
-        if (currentText) {
-            currentText.set('text', this.value);
-            canvas.renderAll();
-        }
-    });
-
-    fontSelect.addEventListener('change', function () {
-        if (currentText) {
-            currentText.set('fontFamily', this.value);
-            canvas.renderAll();
-        }
-    });
-
-    textColor.addEventListener('input', function () {
-        if (currentText) {
-            currentText.set('fill', this.value);
-            canvas.renderAll();
-        }
-    });
-});
+        if (asset) {
+            // Load from predefined assets
+            loadAsset(`assets/\${asset}.png`);
+        } else if (userAssetUpload.files[0]) {
+            // Load from
