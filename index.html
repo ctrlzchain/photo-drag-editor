@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photo Drag Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Photo Drag Editor</h1>
+  <input type="file" id="upload" accept="image/*" />
+  <div id="editor">
+    <canvas id="canvas"></canvas>
+    <div id="accessories">
+      <img src="assets/icon1.png" draggable="true" class="draggable" />
+      <img src="assets/icon2.png" draggable="true" class="draggable" />
+    </div>
+  </div>
+  <button id="download">Download Image</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
