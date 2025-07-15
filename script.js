@@ -1,56 +1,82 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let image = null;
-let elements = [];
+const uploadInput = document.getElementById('upload');
+const mainImage = document.getElementById('main-image');
+const overlay = document.getElementById('overlay');
+const accessories = document.querySelectorAll('.accessory');
 
-document.getElementById('upload').addEventListener('change', (e) => {
+uploadInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = function(event) {
-    image = new Image();
-    image.onload = () => {
-      canvas.width = image.width;
-      canvas.height = image.height;
-      ctx.drawImage(image, 0, 0);
-      redraw();
-    };
-    image.src = event.target.result;
+    mainImage.src = event.target.result;
+    overlay.innerHTML = '';
   };
   reader.readAsDataURL(file);
 });
 
-document.querySelectorAll('.draggable').forEach((icon) => {
-  icon.addEventListener('dragstart', (e) => {
-    e.dataTransfer.setData('text/plain', e.target.src);
+// Clone accessory and add to overlay
+accessories.forEach(item => {
+  item.addEventListener('click', () => {
+    const clone = item.cloneNode(true);
+    clone.classList.add('draggable', 'resizable');
+    clone.style.left = '50px';
+    clone.style.top = '50px';
+    overlay.appendChild(clone);
+    makeInteractive(clone);
   });
 });
 
-canvas.addEventListener('dragover', (e) => e.preventDefault());
+// Enable dragging + resizing + rotating
+function makeInteractive(el) {
+  interact(el)
+    .draggable({
+      listeners: {
+        move(event) {
+          const target = event.target;
+          const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+          const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-canvas.addEventListener('drop', (e) => {
-  e.preventDefault();
-  const src = e.dataTransfer.getData('text/plain');
-  const img = new Image();
-  img.onload = () => {
-    const rect = canvas.getBoundingClientRect();
-    elements.push({ img, x: e.clientX - rect.left, y: e.clientY - rect.top });
-    redraw();
-  };
-  img.src = src;
-});
+          target.style.transform = `translate(${x}px, ${y}px) rotate(${target.getAttribute('data-rot') || 0}deg)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        }
+      }
+    })
+    .resizable({
+      edges: { left: true, right: true, bottom: true, top: true },
+      preserveAspectRatio: true,
+    })
+    .on('resizemove', function (event) {
+      const target = event.target;
+      let width = event.rect.width;
+      let height = event.rect.height;
 
-function redraw() {
-  if (!image) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(image, 0, 0);
-  elements.forEach(({ img, x, y }) => {
-    ctx.drawImage(img, x - img.width / 2, y - img.height / 2, img.width, img.height);
-  });
+      target.style.width = width + 'px';
+      target.style.height = height + 'px';
+    })
+    .gesturable({
+      listeners: {
+        move(event) {
+          const target = event.target;
+          let current = parseFloat(target.getAttribute('data-rot')) || 0;
+          const rotation = current + event.da;
+          target.setAttribute('data-rot', rotation);
+          const x = parseFloat(target.getAttribute('data-x')) || 0;
+          const y = parseFloat(target.getAttribute('data-y')) || 0;
+          target.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+        }
+      }
+    });
 }
 
+// Download final result as image
 document.getElementById('download').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = 'edited-image.png';
-  link.href = canvas.toDataURL();
-  link.click();
+  const wrapper = document.getElementById('canvas-wrapper');
+
+  html2canvas(wrapper).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'photo-edited.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
 });

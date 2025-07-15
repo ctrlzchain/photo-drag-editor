@@ -1,26 +1,65 @@
 body {
-  font-family: sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   text-align: center;
+  background: #f4f4f4;
+  margin: 0;
   padding: 20px;
 }
 
-#editor {
-  position: relative;
-  display: inline-block;
-  border: 1px solid #ccc;
+h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+#editor-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 20px;
 }
 
-canvas {
-  border: 2px solid #333;
+#canvas-wrapper {
+  position: relative;
+  border: 3px dashed #aaa;
+  width: fit-content;
 }
 
-#accessories {
-  margin-top: 10px;
+#main-image {
+  max-width: 600px;
+  display: block;
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.accessory {
+  width: 60px;
+  margin: 10px;
+  cursor: grab;
+  border: 2px solid #ccc;
+  border-radius: 8px;
 }
 
 .draggable {
-  width: 50px;
-  margin: 0 10px;
-  cursor: grab;
+  position: absolute;
+  touch-action: none;
+}
+
+.resizable {
+  border: 2px dashed #666;
+  border-radius: 10px;
+}
+
+button#download {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
