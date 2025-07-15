@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const imageUpload = document.getElementById('imageUpload');
-    const uploadButton = document.getElementById('uploadButton'); //Unused
     const imageCanvas = document.getElementById('imageCanvas');
     const textInput = document.getElementById('textInput');
     const fontSelect = document.getElementById('fontSelect');
     const textColor = document.getElementById('textColor');
     const addTextButton = document.getElementById('addTextButton');
+    const assetSelect = document.getElementById('assetSelect');
+    const addAssetButton = document.getElementById('addAssetButton');
     const rotationInput = document.getElementById('rotationInput');
     const rotateButton = document.getElementById('rotateButton');
     const applyAuraButton = document.getElementById('applyAuraButton');
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Image Upload Handler
     imageUpload.addEventListener('change', (event) => {
-        clearError(); // Clear any previous errors
+        clearError();
 
         const file = event.target.files[0];
 
@@ -42,10 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fabric.Image.fromURL(e.target.result, (img) => {
                 canvas.clear();
 
-                // Scale image to fit canvas
                 const scaleX = canvas.width / img.width;
                 const scaleY = canvas.height / img.height;
-                const scale = Math.min(scaleX, scaleY); // Use the smaller scale to fit
+                const scale = Math.min(scaleX, scaleY);
 
                 img.set({
                     scaleX: scale,
@@ -85,12 +85,40 @@ document.addEventListener('DOMContentLoaded', () => {
             hasRotatingPoint: true,
             cornerStyle: 'circle',
             cornerColor: 'blue',
-            borderColor: 'blue',
+            borderColor: 'blue'
         });
 
         canvas.add(fabricText);
-        canvas.setActiveObject(fabricText); // Select the newly added text
+        canvas.setActiveObject(fabricText);
         currentText = fabricText;
+    });
+
+    // Add Asset Handler
+    addAssetButton.addEventListener('click', () => {
+        clearError();
+        const asset = assetSelect.value;
+
+        if (!asset) {
+            return; // No asset selected
+        }
+
+        const assetURL = `assets/\${asset}.png`; // Construct the asset URL
+
+        fabric.Image.fromURL(assetURL, (img) => {
+            img.set({
+                left: 100,
+                top: 100,
+                originX: 'center',
+                originY: 'center',
+                hasRotatingPoint: true,
+                scaleX: 0.5, // Adjust initial scale
+                scaleY: 0.5
+            });
+
+            canvas.add(img);
+            canvas.setActiveObject(img);
+            canvas.renderAll();
+        }, { crossOrigin: 'anonymous' });
     });
 
     // Rotate Handler
@@ -138,16 +166,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Canvas Object Selection Handler
     canvas.on('object:selected', (options) => {
-      if (options.target && options.target.type === 'text') {
-          textInput.value = options.target.text;
-          fontSelect.value = options.target.fontFamily;
-          textColor.value = options.target.fill;
-          currentText = options.target;
-
-      } else {
-          textInput.value = "";
-          currentText = null;
-      }
+        if (options.target && options.target.type === 'text') {
+            textInput.value = options.target.text;
+            fontSelect.value = options.target.fontFamily;
+            textColor.value = options.target.fill;
+            currentText = options.target;
+        } else {
+            textInput.value = "";
+            currentText = null;
+        }
     });
 
     canvas.on('object:moving', (options) => {
@@ -160,25 +187,24 @@ document.addEventListener('DOMContentLoaded', () => {
         clearError();
     });
 
-    textInput.addEventListener('input', function() {
+    textInput.addEventListener('input', function () {
         if (currentText) {
             currentText.set('text', this.value);
             canvas.renderAll();
         }
     });
 
-    fontSelect.addEventListener('change', function() {
+    fontSelect.addEventListener('change', function () {
         if (currentText) {
             currentText.set('fontFamily', this.value);
             canvas.renderAll();
         }
     });
 
-    textColor.addEventListener('input', function() {
+    textColor.addEventListener('input', function () {
         if (currentText) {
             currentText.set('fill', this.value);
             canvas.renderAll();
         }
     });
-
 });
